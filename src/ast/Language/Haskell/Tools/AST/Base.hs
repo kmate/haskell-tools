@@ -31,15 +31,22 @@ type family StSem wt sem (elem :: * -> * -> *) info
 type instance StSem wt sem elem info = PrimSemantic sem (elem wt) info
 
 
-type family NodeSemantic wt sem (elem :: * -> *) :: * -> *
+type family NodeSemantic wt sem (elem :: * -> *) info :: *
 
-type instance NodeSemantic IdenticSemantic IdSem    elem = elem
-type instance NodeSemantic IdenticSemantic ListSem  elem = [elem]
-type instance NodeSemantic IdenticSemantic MaybeSem elem = Maybe elem
+{-
+data C (a :: * -> *) (b :: * -> *) (c :: *)
 
-type instance NodeSemantic AnnotationSemantic IdSem    elem = Ann      elem
-type instance NodeSemantic AnnotationSemantic ListSem  elem = AnnList  elem
-type instance NodeSemantic AnnotationSemantic MaybeSem elem = AnnMaybe elem
+type family Comp (a :: * -> *)
+type instance Comp (C a b c) = a (b c)
+-}
+
+type instance NodeSemantic IdenticSemantic IdSem    elem info = elem info
+type instance NodeSemantic IdenticSemantic ListSem  elem info = elem info
+type instance NodeSemantic IdenticSemantic MaybeSem elem info = elem info
+
+type instance NodeSemantic AnnotationSemantic IdSem    elem info = Ann      elem info
+type instance NodeSemantic AnnotationSemantic ListSem  elem info = AnnList  elem info
+type instance NodeSemantic AnnotationSemantic MaybeSem elem info = AnnMaybe elem info
 
 class StructuralSemantic sem (elem :: * -> * -> *) info where
     type IdType    elem sem info
