@@ -21,16 +21,25 @@ data MaybeSem
 data a :> b
 infixr 5 :>
 
-type family PrimSemantic sem :: (* -> *) -> * -> *
-type instance PrimSemantic IdSem = Ann
-type instance PrimSemantic ListSem = AnnList
-type instance PrimSemantic MaybeSem = AnnMaybe
+type family PrimSemantic sem (elem :: * -> *) :: * -> *
+type instance PrimSemantic IdSem    elem = Ann elem
+type instance PrimSemantic ListSem  elem = AnnList elem
+type instance PrimSemantic MaybeSem elem = AnnMaybe elem
+type instance PrimSemantic (a :> b) elem = (PrimSemantic a (PrimSemantic b elem))
 
-type family StSem sem (elem :: * -> * -> *) info
-type instance StSem IdSem    elem info = (PrimSemantic IdSem)    (elem IdSem) info
-type instance StSem ListSem  elem info = (PrimSemantic ListSem)  (elem ListSem) info
-type instance StSem MaybeSem elem info = (PrimSemantic MaybeSem) (elem MaybeSem) info
-type instance StSem (a :> b) elem info = (PrimSemantic a) (StSem b elem info) info
+type family StSem wt sem (elem :: * -> * -> *) info
+type instance StSem wt sem elem info = PrimSemantic sem (elem wt) info
+
+
+type family NodeSemantic wt sem (elem :: * -> *) :: * -> *
+
+type instance NodeSemantic IdenticSemantic IdSem    elem = elem
+type instance NodeSemantic IdenticSemantic ListSem  elem = [elem]
+type instance NodeSemantic IdenticSemantic MaybeSem elem = Maybe elem
+
+type instance NodeSemantic AnnotationSemantic IdSem    elem = Ann      elem
+type instance NodeSemantic AnnotationSemantic ListSem  elem = AnnList  elem
+type instance NodeSemantic AnnotationSemantic MaybeSem elem = AnnMaybe elem
 
 class StructuralSemantic sem (elem :: * -> * -> *) info where
     type IdType    elem sem info
