@@ -12,41 +12,35 @@ module Language.Haskell.Tools.AST.Base where
   
 import Language.Haskell.Tools.AST.Ann
 
-data AnnotationSemantic = AnnotationSemantic
-data IdenticSemantic = IdenticSemantic
+data SourceA = SourceA
+data RawA = RawA
 
-data IdSem
-data ListSem
-data MaybeSem
+data IdS
+data ListS
+data MaybeS
+
 data a :> b
 infixr 5 :>
 
-type family PrimSemantic sem (elem :: * -> *) :: * -> *
-type instance PrimSemantic IdSem    elem = Ann elem
-type instance PrimSemantic ListSem  elem = AnnList elem
-type instance PrimSemantic MaybeSem elem = AnnMaybe elem
-type instance PrimSemantic (a :> b) elem = (PrimSemantic a (PrimSemantic b elem))
 
-type family StSem wt sem (elem :: * -> * -> *) info
-type instance StSem wt sem elem info = PrimSemantic sem (elem wt) info
+type family Node wt sem elem :: *
 
+type instance Node RawA IdS    elem = elem
+type instance Node RawA ListS  elem = [elem]
+type instance Node RawA MaybeS elem = Maybe elem
 
-type family NodeSemantic wt sem (elem :: * -> *) info :: *
+type instance Node SourceA IdS    elem = Look Ann elem
+type instance Node SourceA ListS  elem = Look AnnList elem
+type instance Node SourceA MaybeS elem = Look AnnMaybe elem
 
-{-
-data C (a :: * -> *) (b :: * -> *) (c :: *)
+type instance Node sem (a :> b) elem = Node sem a (Node sem b elem)
 
-type family Comp (a :: * -> *)
-type instance Comp (C a b c) = a (b c)
--}
+type family Look (w :: (* -> *) -> * -> *) elem where
+    Look w (e wt i) = w (e wt) i
+    Look w ((e :: (* -> *) -> * -> *) (wt :: * -> *) i) = w (e wt) i
+    
 
-type instance NodeSemantic IdenticSemantic IdSem    elem info = elem info
-type instance NodeSemantic IdenticSemantic ListSem  elem info = elem info
-type instance NodeSemantic IdenticSemantic MaybeSem elem info = elem info
-
-type instance NodeSemantic AnnotationSemantic IdSem    elem info = Ann      elem info
-type instance NodeSemantic AnnotationSemantic ListSem  elem info = AnnList  elem info
-type instance NodeSemantic AnnotationSemantic MaybeSem elem info = AnnMaybe elem info
+type NodeSem sem wt elem info = Node sem wt (elem sem info)
 
 class StructuralSemantic sem (elem :: * -> * -> *) info where
     type IdType    elem sem info

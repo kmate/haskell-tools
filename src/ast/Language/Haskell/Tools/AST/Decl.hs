@@ -1,11 +1,13 @@
 
+{-# LANGUAGE TypeFamilies #-}
+
 module Language.Haskell.Tools.AST.Decl where
 
 import Language.Haskell.Tools.AST.Ann
 import Language.Haskell.Tools.AST.Base
 import Language.Haskell.Tools.AST.Literals
 
-
+--type instance Look w (Decl wt i) = w (Decl wt) i
 data Decl wt a
   = TypeDecl { declHead :: IdType DeclHead wt a
              , declType :: IdType Type wt a
