@@ -23,7 +23,7 @@ data a :> b
 infixr 5 :>
 
 
-type family Node wt sem elem :: *
+type family Node ann sem elem :: *
 
 type instance Node RawA IdS    elem = elem
 type instance Node RawA ListS  elem = [elem]
@@ -33,15 +33,15 @@ type instance Node SourceA IdS    elem = Look Ann elem
 type instance Node SourceA ListS  elem = Look AnnList elem
 type instance Node SourceA MaybeS elem = Look AnnMaybe elem
 
-type instance Node sem (a :> b) elem = Node sem a (Node sem b elem)
+type instance Node ann (a :> b) elem = Node ann a (Node ann b elem)
 
 type family Look (w :: (* -> *) -> * -> *) elem where
     Look w (e wt i) = w (e wt) i
     Look w ((e :: (* -> *) -> * -> *) (wt :: * -> *) i) = w (e wt) i
     
 
-type NodeSem sem wt elem info = Node sem wt (elem sem info)
-
+type NodeSem ann sem elem info = Node ann sem (elem ann info)
+{-
 class StructuralSemantic sem (elem :: * -> * -> *) info where
     type IdType    elem sem info
     type ListType  elem sem info
@@ -156,3 +156,4 @@ data PhaseNumber wt a = PhaseNumber { phaseNum :: Integer }
 -- | A tilde that marks the inversion of the phase number
 data PhaseInvert wt a = PhaseInvert
 
+-}
